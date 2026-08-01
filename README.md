@@ -1,6 +1,6 @@
-# 💬 Lecteur de Conversations JSON
+# 💬 Lecteur d'Exports mammouth.ai
 
-Application web simple pour visualiser des conversations extraites d'un fichier JSON.
+Lecteur web spécifiquement conçu pour visualiser les exports de conversations de mammouth.ai (format JSON).
 
 ## 🚀 Lancement
 
@@ -10,31 +10,38 @@ Application web simple pour visualiser des conversations extraites d'un fichier 
 
 Aucune dépendance n'est requise. Tout fonctionne en vanilla HTML/CSS/JS.
 
-## 📋 Format JSON supporté
+## 📋 Formats JSON supportés
 
-L'application accepte plusieurs structures :
-
-### Structure standard (recommandée)
+### Format d'export mammouth.ai (principal)
+L'application est optimisée pour le format d'export natif de mammouth.ai :
 ```json
-{
-  "chats": [
-    {
-      "id": 1,
-      "title": "Titre de la conversation",
-      "createdAt": "2026-07-20T10:00:00Z",
-      "messages": [
-        { "type": "message", "id": 101, "content": "...", "model": "user" },
-        { "type": "message", "id": 102, "content": "...", "model": "gpt-5" }
-      ]
-    }
-  ]
-}
+[
+  {
+    "type": "customMammoth",
+    "chats": [
+      {
+        "id": 1,
+        "title": "Titre de la conversation",
+        "createdAt": "2026-07-20T10:00:00Z",
+        "messages": [
+          { "type": "message", "id": 101, "content": "...", "model": "user" },
+          { "type": "message", "id": 102, "content": "...", "model": "gpt-5" }
+        ]
+      }
+    ]
+  }
+]
 ```
+**Particularités du format mammouth.ai :**
+- Les messages alternent automatiquement entre utilisateur (index pair) et assistant (index impair)
+- Le champ `model` indique le modèle utilisé pour la conversation entière
+- Les blocs de raisonnement sont délimités par les balises `<think>` et `</think>`
 
-### Autres structures acceptées
-- Tableau direct : `[ { id, title, messages, ... }, ... ]`
-- Clé `conversations` au lieu de `chats`
-- Structure `document` (wrapper) : l'application cherche récursivement
+### Autres formats compatibles
+- **Structure standard** : `{ "chats": [...] }`
+- **Tableau direct** : `[ { id, title, messages, ... }, ... ]`
+- **Clé `conversations`** : `{ "conversations": [...] }`
+- **Structure `document`** (wrapper) : l'application cherche récursivement
 
 ### Rôles des messages
 Le champ `model` détermine l'affichage du message :
@@ -46,6 +53,7 @@ Le champ `model` détermine l'affichage du message :
 
 ## ✨ Fonctionnalités
 
+- **Optimisé pour les exports mammouth.ai** : prise en charge native du format d'export, gestion des blocs de raisonnement (`<think>` et `</think>`), alternance automatique des rôles
 - **Lecture de fichiers JSON** depuis le disque local
 - **Liste des conversations** avec titre, date et nombre de messages
 - **Affichage détaillé** avec bulles différenciées (utilisateur / assistant / système)
@@ -57,7 +65,7 @@ Le champ `model` détermine l'affichage du message :
 
 ## 📂 Structure du projet
 ```
-conversation-reader/
+mammouthai_reader/
 ├── index.html      # Structure HTML
 ├── style.css       # Styles CSS
 ├── script.js       # Logique JavaScript
