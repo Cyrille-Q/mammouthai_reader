@@ -1,22 +1,23 @@
 /* ===== Variables ===== */
 :root {
-  --bg-primary: #1a1a2e;
-  --bg-secondary: #16213e;
-  --bg-tertiary: #0f3460;
-  --bg-message-user: #e8f0fe;
-  --bg-message-ai: #f5f5f5;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #f1f3f5;
+  --bg-message-user: #e8f4ff;
+  --bg-message-ai: #f9f9f9;
   --bg-message-system: #fff8e1;
-  --text-primary: #eee;
-  --text-secondary: #b0b0c0;
-  --text-dark: #1a1a2e;
-  --accent: #0f3460;
-  --accent-light: #1a5276;
-  --accent-hover: #247ba0;
-  --selected: #1a5276;
+  --text-primary: #311A17;
+  --text-secondary: #666666;
+  --text-dark: #311A17;
+  --accent: #311A17;
+  --accent-light: #4a2c29;
+  --accent-hover: #5c3e3b;
+  --selected: #e8f4ff;
+  --color-on-accent: #ffffff;
   --error-bg: #c0392b;
   --error-text: #fff;
-  --border: #2a2a4a;
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --border: #e0e0e0;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 /* ===== Reset ===== */
@@ -26,9 +27,14 @@
   box-sizing: border-box;
 }
 
+/* ===== Typography ===== */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 800;
+}
+
 html, body {
   height: 100%;
-  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 15px;
   line-height: 1.6;
   color: var(--text-primary);
@@ -50,7 +56,7 @@ html, body {
 
 .app-header h1 {
   font-size: 1.4rem;
-  font-weight: 600;
+  font-weight: 800;
 }
 
 .file-controls {
@@ -61,7 +67,7 @@ html, body {
 
 .btn-file {
   background: var(--accent);
-  color: #fff;
+  color: var(--color-on-accent);
   border: none;
   padding: 8px 18px;
   border-radius: 6px;
@@ -118,12 +124,12 @@ html, body {
 
 .sidebar-header h2 {
   font-size: 1.1rem;
-  font-weight: 600;
+  font-weight: 800;
 }
 
 .count-badge {
   background: var(--accent);
-  color: #fff;
+  color: var(--color-on-accent);
   font-size: 0.75rem;
   font-weight: 600;
   padding: 2px 10px;
@@ -179,12 +185,12 @@ html, body {
 }
 
 .conversation-item:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(0, 0, 0, 0.04);
 }
 
 .conversation-item.selected {
   background: var(--selected);
-  border-left: 3px solid #4fc3f7;
+  border-left: 3px solid var(--accent);
 }
 
 .conversation-item .item-title {
@@ -210,7 +216,7 @@ html, body {
 }
 
 .conversation-item .item-msg-count {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.08);
   padding: 1px 8px;
   border-radius: 10px;
   font-size: 0.72rem;
@@ -264,8 +270,7 @@ html, body {
 
 .conversation-header h2 {
   font-size: 1.2rem;
-  font-weight: 600;
-  margin-bottom: 4px;
+  font-weight: 800;
 }
 
 .conversation-header .conv-meta {
@@ -448,7 +453,7 @@ html, body {
 .error-close {
   background: none;
   border: none;
-  color: #fff;
+  color: var(--error-text);
   font-size: 1.4rem;
   cursor: pointer;
   padding: 0;
@@ -465,12 +470,50 @@ html, body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.15);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* ===== Branding ===== */
+.branding-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-secondary);
+  flex-shrink: 0;
+}
+
+.branding-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  transition: color 0.2s;
+}
+
+.branding-link:hover {
+  color: var(--accent);
+}
+
+.branding-text {
+  opacity: 0.8;
+}
+
+.branding-name {
+  font-weight: 600;
+}
+
+/* ===== Empty State ===== */
+.empty-conversation {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-secondary);
 }
 
 /* ===== Responsive ===== */
