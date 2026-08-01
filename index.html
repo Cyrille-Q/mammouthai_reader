@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecteur de Conversations JSON</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1>💬 Lecteur de Conversations</h1>
+    <div class="file-controls">
+      <input type="file" id="file-input" accept=".json" aria-label="Sélectionner un fichier JSON" hidden>
+      <button id="file-button" class="btn-file" aria-label="Choisir un fichier JSON">
+        📂 Choisir un fichier
+      </button>
+      <span id="file-name" class="file-name" aria-live="polite">Aucun fichier chargé</span>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <aside class="sidebar" aria-label="Liste des conversations">
+      <div class="sidebar-header">
+        <h2>Conversations</h2>
+        <span id="conversation-count" class="count-badge" aria-live="polite">0</span>
+      </div>
+      <div class="search-container">
+        <input type="text" id="search-input" class="search-input" placeholder="🔎 Rechercher..." aria-label="Rechercher une conversation">
+      </div>
+      <nav id="conversations-list" class="conversations-list" role="list" aria-label="Liste des conversations">
+        <p class="placeholder">Veuillez sélectionner un fichier JSON.</p>
+      </nav>
+    </aside>
+
+    <section class="content" aria-label="Contenu de la conversation" aria-live="polite">
+      <div id="conversation-content" class="conversation-content">
+        <div class="empty-state">
+          <span class="empty-icon">💬</span>
+          <p>Sélectionnez une conversation pour afficher son contenu.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="error-banner" class="error-banner hidden" role="alert" aria-live="assertive">
+    <span id="error-message"></span>
+    <button class="error-close" aria-label="Fermer l'erreur" onclick="document.getElementById('error-banner').classList.add('hidden')">×</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
