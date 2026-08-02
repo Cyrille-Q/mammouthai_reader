@@ -186,7 +186,7 @@ function displayConversation(conv) {
   `;
 
   if (messages.length === 0) {
-    html += '<p class="placeholder" style="text-align:center;padding:40px;color:#b0b0c0;">Cette conversation ne contient aucun message.</p>';
+    html += '<p class="empty-conversation">Cette conversation ne contient aucun message.</p>';
   } else {
     messages.forEach((msg, index) => {
       html += renderMessage(msg, index);

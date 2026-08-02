@@ -4,11 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lecteur de Conversations JSON</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="app-header">
-    <h1>💬 Lecteur de Conversations</h1>
+    <h1>
+      <img src="logo.svg" alt="" class="logo-header" aria-hidden="true">
+      <span>Lecteur de Conversations</span>
+    </h1>
     <div class="file-controls">
       <input type="file" id="file-input" accept=".json" aria-label="Sélectionner un fichier JSON" hidden>
       <button id="file-button" class="btn-file" aria-label="Choisir un fichier JSON">
@@ -30,6 +36,12 @@
       <nav id="conversations-list" class="conversations-list" role="list" aria-label="Liste des conversations">
         <p class="placeholder">Veuillez sélectionner un fichier JSON.</p>
       </nav>
+      <div class="branding-footer">
+        <a href="https://mammouth.ai" target="_blank" rel="noopener noreferrer" class="branding-link">
+          <span class="branding-text">Powered by</span>
+          <span class="branding-name">mammouth.ai</span>
+        </a>
+      </div>
     </aside>
 
     <section class="content" aria-label="Contenu de la conversation" aria-live="polite">
