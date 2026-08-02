@@ -127,8 +127,17 @@ html, body {
 }
 
 .app-header h1 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 1.4rem;
   font-weight: 800;
+}
+
+.logo-header {
+  height: 28px;
+  width: auto;
+  vertical-align: middle;
 }
 
 .file-controls {
@@ -607,7 +616,7 @@ html, body {
     max-width: 95%;
   }
 
-  .messages-container {
-    padding: 16px;
+  .logo-header {
+    height: 24px;
   }
 }
