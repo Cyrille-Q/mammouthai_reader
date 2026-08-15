@@ -137,13 +137,23 @@ function displayConversations(conversations) {
     const msgCount = conv.messages ? conv.messages.length : 0;
     const dateStr = conv.createdAt ? formatDate(conv.createdAt) : '';
 
+    const title = conv.title || 'Sans titre';
     item.innerHTML = `
-      <div class="item-title">${escapeHtml(conv.title || 'Sans titre')}</div>
+      <div class="item-main">
+        <div class="item-title">${escapeHtml(title)}</div>
+        <button type="button" class="btn-export" aria-label="Exporter la conversation en Markdown" title="Exporter en Markdown">⬇</button>
+      </div>
       <div class="item-meta">
         ${dateStr ? `<span class="item-date">📅 ${dateStr}</span>` : ''}
         <span class="item-msg-count">${msgCount} msg</span>
       </div>
     `;
+
+    const exportBtn = item.querySelector('.btn-export');
+    exportBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      exportConversation(conv);
+    });
 
     conversationsList.appendChild(item);
   });
@@ -325,6 +335,162 @@ function handleSearch(event) {
   }
 
   displayConversations(state.filteredConversations);
+}
+
+// ===== Export Markdown =====
+
+async function exportConversation(conv) {
+  const markdown = conversationToMarkdown(conv);
+  const filename = sanitizeFilename(conv.title, conv.id);
+  if ('showSaveFilePicker' in window) {
+    await saveFileWithPicker(filename, markdown);
+  } else {
+    downloadMarkdown(filename, markdown);
+  }
+}
+
+/**
+ * Enregistre le fichier via la boîte de dialogue native de choix de destination
+ * (File System Access API, supportée par Chromium). En cas d'annulation, ne fait
+ * rien ; en cas d'erreur, affiche la bannière d'erreur.
+ */
+async function saveFileWithPicker(filename, content) {
+  let handle;
+  try {
+    handle = await window.showSaveFilePicker({
+      suggestedName: filename,
+      types: [{ description: 'Markdown', accept: { 'text/markdown': ['.md'] } }],
+    });
+  } catch (err) {
+    if (err.name === 'AbortError') return;
+    showError("Impossible d'ouvrir la boîte de dialogue : " + err.message);
+    return;
+  }
+
+  try {
+    const writable = await handle.createWritable();
+    await writable.write(content);
+    await writable.close();
+  } catch (err) {
+    showError("Erreur d'enregistrement : " + err.message);
+  }
+}
+
+/**
+ * Génère une représentation Markdown claire et lisible de la conversation :
+ * titre et métadonnées, puis chaque message identifié par son rôle (utilisateur,
+ * raisonnement, assistant, système), le modèle utilisé et une liste de liens.
+ */
+function conversationToMarkdown(conv) {
+  const messages = conv.messages || [];
+  const dateStr = conv.createdAt ? formatDate(conv.createdAt) : '';
+  const updatedStr = conv.updatedAt ? formatDate(conv.updatedAt) : '';
+
+  const metaParts = [];
+  if (dateStr) metaParts.push(`Créée le ${dateStr}`);
+  if (updatedStr) metaParts.push(`Modifiée le ${updatedStr}`);
+  metaParts.push(`${messages.length} message${messages.length > 1 ? 's' : ''}`);
+
+  const lines = [];
+  lines.push(`# ${conv.title || 'Sans titre'}`);
+  lines.push('');
+  lines.push(`> ${metaParts.join(' · ')}`);
+  lines.push('');
+
+  if (messages.length === 0) {
+    lines.push('_Cette conversation ne contient aucun message._');
+  } else {
+    messages.forEach((msg, index) => {
+      const role = getRole(msg, index);
+      const timeStr = msg.createdAt ? escapeHtml(formatDate(msg.createdAt)) : '';
+      const model = msg.model ? escapeHtml(msg.model) : '';
+
+      const headParts = [];
+      if (timeStr) headParts.push(timeStr);
+      if (role === 'assistant' && model) headParts.push(`modèle : ${model}`);
+      const headSuffix = headParts.length ? ` · ${headParts.join(' · ')}` : '';
+
+      if (index > 0) lines.push('---');
+      lines.push('');
+
+      if (role === 'user') {
+        lines.push(`## 👤 Utilisateur${headSuffix}`);
+      } else if (role === 'system') {
+        lines.push(`## ⚙️ Système${headSuffix}`);
+      } else {
+        lines.push(`## 🤖 Assistant${headSuffix}`);
+      }
+      lines.push('');
+
+      const rawContent = msg.content || '';
+
+      if (role === 'assistant') {
+        const { thinking, content } = splitThinking(rawContent);
+        if (thinking) {
+          lines.push('### 💭 Raisonnement');
+          lines.push('');
+          lines.push('> ' + thinking.replace(/\s*\n\s*/g, '\n> '));
+          lines.push('');
+        }
+        lines.push(content.trim());
+      } else if (role === 'system') {
+        lines.push(`_${rawContent.trim()}_`);
+      } else {
+        lines.push(rawContent);
+      }
+      lines.push('');
+
+      const links = extractLinks(rawContent);
+      if (links.length > 0) {
+        lines.push('### 🔗 Liens détectés');
+        lines.push('');
+        links.forEach((url) => lines.push(`- [${url}](${url})`));
+        lines.push('');
+      }
+    });
+  }
+
+  return lines.join('\n').trim() + '\n';
+}
+
+/**
+ * Extrait les URL présentes dans le contenu d'un message (liste unique et ordonnée).
+ */
+function extractLinks(text) {
+  if (!text) return [];
+  const urlRegex = /https?:\/\/[^\s<>"'`]+/g;
+  const matches = text.match(urlRegex) || [];
+  return [...new Set(matches.map((url) => url.replace(/[.,;:!?)\]}]+$/, '')))];
+}
+
+/**
+ * Transforme un titre en nom de fichier sûr (slug), avec repli sur l'identifiant
+ * ou "sans-titre" si aucun titre valide n'est disponible.
+ */
+function sanitizeFilename(title, id) {
+  let base = (title || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  if (!base) base = id ? String(id).replace(/[^a-zA-Z0-9-_]+/g, '-') : 'sans-titre';
+  return `${base.slice(0, 80) || 'conversation'}.md`;
+}
+
+/**
+ * Télécharge un contenu Markdown en ouvrant le dialogue natif "Enregistrer sous".
+ */
+function downloadMarkdown(filename, content) {
+  const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
 
 // ===== Utilitaires =====
