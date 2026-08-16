@@ -29,7 +29,7 @@ Compact instructions for OpenCode sessions. Focus on repo-specific details that 
 
 ## Code Notes
 
-- `script.js` is vanilla ES6, split into: state, DOM refs, file handling, conversation extraction/display, message rendering, search, and utilities.
+- `script.js` is vanilla ES6, split into: state, DOM refs, file handling, conversation extraction/display, message rendering, search, Markdown export, and utilities.
 - `index.html`/`script.js` use French ARIA labels and placeholders; keep them in French.
 
 ### Conversation extraction (`extractConversations`)
@@ -58,6 +58,13 @@ Compact instructions for OpenCode sessions. Focus on repo-specific details that 
 ### Errors
 - Invalid/unreadable file or JSON parse failure shows the `#error-banner` via `showError`/`hideError`.
 
+### Markdown export (`exportConversation`)
+- Every `.conversation-item` has an export button (`.btn-export`, `aria-label` in French, `⬇`) whose click calls `exportConversation` with `stopPropagation` so it does not select the conversation.
+- `conversationToMarkdown` builds a readable doc: title + metadata (dates, message count), then per message a role heading (`👤 Utilisateur`/`🤖 Assistant`/`⚙️ Système`), the model badge and timestamp on assistant answers, the « 💭 Raisonnement » block as a quoted (`>`) section, the content, and a « 🔗 Liens détectés » list (`- [url](url)`).
+- `extractLinks` collects unique URLs via an `https?://…` regex, stripping trailing punctuation.
+- `sanitizeFilename` turns the title into a safe ASCII slug (NFD, allowed chars), falling back to the `id` or `sans-titre`, suffixed `.md`.
+- **Storage**: `saveFileWithPicker` (File System Access API, `showSaveFilePicker`) opens the native save/destination dialog **only in a secure context** (HTTPS or `localhost`, not `file://`). Otherwise `downloadMarkdown` (Blob + `<a download>`) is the automatic fallback. Errors surface via `showError`; dialog cancellation (`AbortError`) is silent.
+
 ## OpenCode Configuration
 
 - `mammouth.json` (root) sets `lsp: true` and `permission.bash: "ask"`.
@@ -78,6 +85,6 @@ Compact instructions for OpenCode sessions. Focus on repo-specific details that 
 
 1. Open `index.html` in a browser.
 2. Load a mammouth.ai export JSON file.
-3. Conversations appear in the sidebar; search filters them; click to view.
+3. Conversations appear in the sidebar; search filters them; click to view; each item has an export-to-Markdown button.
 
 That’s it—the whole app is three files (`index.html`, `style.css`, `script.js`), with branding docs in `docs/` and sample exports in `exports/`.
