@@ -5,7 +5,7 @@ Compact instructions for OpenCode sessions. Focus on repo-specific details that 
 ## Project Overview
 
 - Static web app for viewing mammouth.ai conversation exports (JSON).
-- No build system, dependencies, or package manager.
+- No build system or package manager; external libraries are vendored locally in `vendor/`.
 - Just open `index.html` in a browser—no dev server needed.
 - UI language is French (headers, buttons, empty states, error messages).
 - Sample data lives in `exports/`; branding rules in `docs/charte_graphique/charte.md`.
@@ -48,9 +48,11 @@ Compact instructions for OpenCode sessions. Focus on repo-specific details that 
 - `splitThinking` strips them; the reason is shown in a collapsible `<details class="msg-thinking">` “Raisonnement” block.
 
 ### Content rendering (`renderContent`)
-- HTML is escaped first (`escapeHtml`) for safety.
-- Fenced code blocks (```lang …```) become `<pre><code>`, inline `` `code` `` becomes `<code>`; line breaks are preserved.
-- No full Markdown or link rendering.
+- Markdown complet (GitHub Flavored Markdown) via `marked` (GFM, breaks).
+- HTML sécurisé via `DOMPurify` (supprime les images, ajoute `target="_blank" rel="noopener noreferrer" aux liens).
+- Les blocs de code (```lang …```) et code inline (`code`) sont rendus avec les styles existants.
+- Les retours à la ligne sont convertis en `<br>` (option `breaks: true`).
+- Les bibliothèques sont hébergées localement dans `vendor/` (marked v18.x, DOMPurify 3.x). La coloration syntaxique via highlight.js est planifiée pour une future passe.
 
 ### Search (`handleSearch`)
 - Filters conversations by **title and/or message content** (case-insensitive) when `#search-input` is non‑empty; otherwise restores the full list.

@@ -26,6 +26,20 @@ fileButton.addEventListener('click', () => fileInput.click());
 fileInput.addEventListener('change', handleFileSelect);
 searchInput.addEventListener('input', handleSearch);
 
+// ===== Rendu Markdown =====
+marked.setOptions({
+  gfm: true,
+  breaks: true,
+});
+
+// Ajouter target="_blank" et rel="noopener noreferrer" aux liens
+DOMPurify.addHook('afterSanitizeAttributes', function (node) {
+  if (node.tagName === 'A') {
+    node.setAttribute('target', '_blank');
+    node.setAttribute('rel', 'noopener noreferrer');
+  }
+});
+
 // ===== Gestion du fichier =====
 
 function handleFileSelect(event) {
@@ -294,26 +308,15 @@ function renderMessage(msg, index) {
 }
 
 /**
- * Rendu du contenu d'un message :
- * - Échappe le HTML pour la sécurité
- * - Détecte et formate les blocs de code
- * - Détecte et formate le code inline
- * - Préserve les retours à la ligne
+ * Rendu du contenu d'un message en Markdown :
+ * - Utilise marked (GFM, breaks) pour convertir le Markdown en HTML
+ * - Purifie le HTML avec DOMPurify (supprime les images, ajoute target="_blank" aux liens)
+ * - Retourne l'HTML sécurisé
  */
 function renderContent(text) {
-  let escaped = escapeHtml(text);
-
-  // Blocs de code
-  const codeFence = '```';
-  const codeRegex = new RegExp(codeFence + '(\\w*)\\n?([\\s\\S]*?)' + codeFence, 'g');
-  escaped = escaped.replace(codeRegex, (match, lang, code) => {
-    return '<pre><code>' + code.trim() + '</code></pre>';
-  });
-
-  // Code inline
-  escaped = escaped.replace(/`([^`\n]+)`/g, (match, code) => '<code>' + code + '</code>');
-
-  return escaped;
+  if (!text) return '';
+  const rawHtml = marked.parse(text);
+  return DOMPurify.sanitize(rawHtml, { FORBID_TAGS: ['img'] });
 }
 
 // ===== Recherche =====
