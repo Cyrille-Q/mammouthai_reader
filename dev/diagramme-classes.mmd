@@ -1,0 +1,115 @@
+classDiagram
+    direction LR
+
+    %% ===== Modèles de données (issues du JSON) =====
+    class Conversation {
+        +id : any
+        +_id : any
+        +title : string
+        +messages : Message[]
+        +createdAt : string
+        +updatedAt : string
+    }
+
+    class Message {
+        +content : string
+        +model : string
+        +createdAt : string
+    }
+
+    %% ===== État global (objet state) =====
+    class State {
+        +conversations : Conversation[]
+        +selectedId : any
+        +filteredConversations : Conversation[]
+    }
+
+    %% ===== Module applicatif (références DOM + écouteurs câblés au chargement) =====
+    class App {
+        -fileInput : HTMLInputElement
+        -fileButton : HTMLButtonElement
+        -fileNameLabel : HTMLSpanElement
+        -conversationsList : HTMLElement
+        -conversationContent : HTMLElement
+        -conversationCount : HTMLSpanElement
+        -searchInput : HTMLInputElement
+        -errorBanner : HTMLElement
+        -errorMessage : HTMLElement
+    }
+
+    %% ===== Gestion du fichier =====
+    class FileHandler {
+        +handleFileSelect(event) void
+        +extractConversations(data) Conversation[]
+        +isValidConversation(item) boolean
+    }
+
+    %% ===== Affichage =====
+    class Display {
+        +displayConversations(conversations) void
+        +selectConversation(id) void
+        +displayConversation(conv) void
+        +getRole(msg, index) string
+        +splitThinking(text) object
+        +renderMessage(msg, index) string
+    }
+
+    %% ===== Moteur de rendu Markdown (bibliothèques vendor) =====
+    class MarkdownRenderer {
+        +marked : Marked
+        +DOMPurify : DOMPurify
+        +renderContent(text) string
+        %% marked.setOptions gfm+breaks
+        %% DOMPurify.addHook afterSanitizeAttributes (liens target/rel)
+        %% DOMPurify.sanitize FORBID_TAGS img
+    }
+
+    %% ===== Recherche =====
+    class Search {
+        +handleSearch(event) void
+    }
+
+    %% ===== Export Markdown =====
+    class MarkdownExport {
+        +exportConversation(conv) Promise~void~
+        +conversationToMarkdown(conv) string
+        +extractLinks(text) string[]
+        +sanitizeFilename(title, id) string
+        +saveFileWithPicker(filename, content) Promise~void~
+        +downloadMarkdown(filename, content) void
+    }
+
+    %% ===== Utilitaires =====
+    class Utils {
+        +escapeHtml(str) string
+        +formatDate(dateStr) string
+        +showError(msg) void
+        +hideError() void
+    }
+
+    %% ===== Relations de composition / utilisation =====
+    App "1" *-- "1" State : contient
+    App ..> FileHandler : délègue
+    App ..> Search : écoute
+    App ..> Display : affiche
+    App ..> Utils : affiche les erreurs
+
+    State "1" o-- "*" Conversation : référence
+    Conversation "1" o-- "*" Message : contient
+
+    FileHandler ..> Conversation : crée
+    FileHandler ..> Utils : showError / hideError
+
+    Display ..> Conversation : affiche
+    Display ..> Message : rend
+    Display ..> MarkdownRenderer : renderContent
+    Display ..> MarkdownExport : bouton export
+    Display ..> Utils : escapeHtml / formatDate
+
+    Search ..> Conversation : filtre
+    Search ..> Display : rafraîchit la liste
+
+    MarkdownExport ..> Conversation : sérialise
+    MarkdownExport ..> Message : sérialise
+    MarkdownExport ..> Display : getRole / splitThinking
+    MarkdownExport ..> Utils : formatDate / escapeHtml / showError
