@@ -475,10 +475,10 @@ html, body {
 .message .msg-content {
   font-size: 0.92rem;
   line-height: 1.65;
-  white-space: pre-wrap;
 }
 
-.message .msg-content code {
+.message .msg-content code,
+.thinking-content code {
   background: rgba(var(--color-grey-rgb), 0.1);
   padding: 1px 5px;
   border-radius: 3px;
@@ -486,7 +486,8 @@ html, body {
   font-size: 0.85rem;
 }
 
-.message .msg-content pre {
+.message .msg-content pre,
+.thinking-content pre {
   background: rgba(var(--color-grey-rgb), 0.1);
   padding: 12px;
   border-radius: 8px;
@@ -494,9 +495,107 @@ html, body {
   margin: 8px 0;
 }
 
-.message .msg-content pre code {
+.message .msg-content pre code,
+.thinking-content pre code {
   background: none;
   padding: 0;
+}
+
+/* Styles Markdown */
+.message .msg-content h1,
+.message .msg-content h2,
+.message .msg-content h3,
+.message .msg-content h4,
+.thinking-content h1,
+.thinking-content h2,
+.thinking-content h3,
+.thinking-content h4 {
+  font-weight: 800;
+  margin-top: 1.2em;
+  margin-bottom: 0.6em;
+  color: var(--ui-text-primary);
+}
+
+.message .msg-content h1 { font-size: 1.4rem; }
+.message .msg-content h2 { font-size: 1.2rem; }
+.message .msg-content h3 { font-size: 1.1rem; }
+.message .msg-content h4 { font-size: 1rem; }
+.thinking-content h1 { font-size: 1.2rem; }
+.thinking-content h2 { font-size: 1.1rem; }
+.thinking-content h3 { font-size: 1rem; }
+.thinking-content h4 { font-size: 0.95rem; }
+
+.message .msg-content p,
+.thinking-content p {
+  margin-bottom: 1em;
+}
+
+.message .msg-content ul,
+.message .msg-content ol,
+.thinking-content ul,
+.thinking-content ol {
+  margin-left: 1.5em;
+  margin-bottom: 1em;
+}
+
+.message .msg-content li,
+.thinking-content li {
+  margin-bottom: 0.3em;
+}
+
+.message .msg-content blockquote,
+.thinking-content blockquote {
+  border-left: 3px solid var(--ui-border-accented);
+  padding-left: 1em;
+  margin-left: 0;
+  margin-right: 0;
+  margin-bottom: 1em;
+  color: var(--ui-text-secondary);
+  font-style: italic;
+}
+
+.message .msg-content a,
+.thinking-content a {
+  color: var(--ui-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.message .msg-content a:hover,
+.thinking-content a:hover {
+  color: var(--ui-accent-hover);
+  text-decoration: none;
+}
+
+.message .msg-content hr,
+.thinking-content hr {
+  border: none;
+  border-top: 1px solid var(--ui-border);
+  margin: 1.5em 0;
+}
+
+.message .msg-content table,
+.thinking-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 1em;
+  display: block;
+  overflow-x: auto;
+}
+
+.message .msg-content th,
+.thinking-content th {
+  background: var(--ui-bg-elevated);
+  font-weight: 600;
+  text-align: left;
+}
+
+.message .msg-content th,
+.message .msg-content td,
+.thinking-content th,
+.thinking-content td {
+  border: 1px solid var(--ui-border);
+  padding: 6px 10px;
 }
 
 .message .msg-time {
