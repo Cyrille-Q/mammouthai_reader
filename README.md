@@ -77,6 +77,16 @@ Les réponses de l'assistant peuvent commencer par un bloc de réflexion délimi
 
 Aucune installation ni réseau requis pour fonctionner : `marked` (rendu Markdown) et `DOMPurify` (assainissement HTML) sont chargés depuis `vendor/`.
 
+## 🧪 Tests
+
+Les fonctions pures de `script.js` (extraction des conversations, rôles, rendu Markdown, export, utilitaires) sont couvertes par des tests unitaires utilisant le test runner intégré de Node.js (`node:test`), sans dépendance externe :
+
+```
+node --test "tests/*.test.js"
+```
+
+Nécessite Node.js 18+. Les tests chargent `script.js` via `module.exports` et simulent un environnement minimal (`document`, `marked`, `DOMPurify`) dans `tests/setup.js` pour s'exécuter sans navigateur.
+
 ## 📂 Structure du projet
 
 ```
@@ -86,6 +96,7 @@ mammouthai_reader/
 ├── script.js           # Logique JavaScript (vanilla ES6)
 ├── logo.svg            # Logo mammouth.ai (header + footer)
 ├── vendor/             # Bibliothèques locales (marked, DOMPurify)
+├── tests/              # Tests unitaires (node:test)
 └── README.md           # Ce fichier
 ```
 

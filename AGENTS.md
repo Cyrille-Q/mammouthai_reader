@@ -9,12 +9,14 @@ Compact instructions for OpenCode sessions. Focus on repo-specific details that 
 - Just open `index.html` in a browser—no dev server needed.
 - UI language is French (headers, buttons, empty states, error messages).
 - Sample data lives in `exports/`; branding rules in `docs/charte_graphique/charte.md`.
+- `script.js` exports its testable functions via `module.exports` (guarded by `typeof module !== 'undefined'`) so `tests/*.test.js` can `require('../script')` under Node without a browser.
 
 ## Development Commands
 
-- No `npm`, `yarn`, `pnpm`, or `bun` scripts.
-- No lint, test, or type‑check commands.
+- No `npm`, `yarn`, `pnpm`, or `bun` scripts, no `package.json`.
+- No build or type‑check commands.
 - Open `index.html` directly—no local server required.
+- Tests use Node's built‑in test runner: `node --test "tests/*.test.js"` (Node 18+). No test framework dependency (Jest/Vitest) is installed.
 
 ## Design Guidelines
 
@@ -36,16 +38,19 @@ Compact instructions for OpenCode sessions. Focus on repo-specific details that 
 - Supports several JSON shapes: mammouth export (array of `{ chats: [...] }` items, flat-mapped),
   `{ chats: [...] }`, `{ conversations: [...] }`, direct array of conversations, and a recursive `document` wrapper.
 - A conversation is valid only if it has an `id`/`_id` and either `messages` or `title` (`isValidConversation`).
+- Defensive: non-object input (`null`, `undefined`, a number, a bare string) returns `[]` instead of throwing.
 
 ### Message roles (`getRole`)
 - `model` value decides the role first: `user`/`human`/`me` → user, `system`/`tool` → system, anything else → assistant.
 - If no recognizable `model`, roles fall back to index alternation for mammouth exports (even index = user, odd = assistant).
 - `model` often carries a display badge on assistant messages (which model replied), not the sender identity.
 - A `createdAt` may render a timestamp per message.
+- Defensive: a non-string `model` (number, object, `null`) or a missing/`null` `msg` is treated as if no `model` were set, falling back to index alternation or `assistant`.
 
 ### Thinking blocks (`splitThinking`, `renderMessage`)
 - Assistant reasoning is delimited by `<think>…</think>` tags at the start of the content.
 - `splitThinking` strips them; the reason is shown in a collapsible `<details class="msg-thinking">` “Raisonnement” block.
+- Defensive: `splitThinking(null)` / `splitThinking(undefined)` return `{ thinking: '', content: '' }` instead of throwing.
 
 ### Content rendering (`renderContent`)
 - Markdown complet (GitHub Flavored Markdown) via `marked` (GFM, breaks).
@@ -67,6 +72,15 @@ Compact instructions for OpenCode sessions. Focus on repo-specific details that 
 - `sanitizeFilename` turns the title into a safe ASCII slug (NFD, allowed chars), falling back to the `id` or `sans-titre`, suffixed `.md`.
 - **Storage**: `saveFileWithPicker` (File System Access API, `showSaveFilePicker`) opens the native save/destination dialog **only in a secure context** (HTTPS or `localhost`, not `file://`). Otherwise `downloadMarkdown` (Blob + `<a download>`) is the automatic fallback. Errors surface via `showError`; dialog cancellation (`AbortError`) is silent.
 
+## Testing
+
+- `tests/*.test.js` use Node's built-in `node:test` + `node:assert`; run with `node --test "tests/*.test.js"`.
+- `tests/setup.js` is `require`d first in every test file: it stubs `document` (minimal `createElement`/`getElementById`), `marked` (the real vendored lib), and a simplified `DOMPurify` mock (regex-based tag/attribute stripping, not the real sanitizer) on `globalThis`, so `script.js` can run under Node without a browser.
+- `tests/fixtures.js` centralizes reusable sample conversations/messages (valid/invalid shapes, mammouth export, message factories).
+- One test file per pure function/group: `escapeHtml.test.js` (+ `formatDate`), `extractLinks.test.js` (+ `sanitizeFilename`), `getRole.test.js` (+ `splitThinking`), `isValidConversation.test.js` (+ `extractConversations`), `renderContent.test.js` (+ `conversationToMarkdown`), `renderMessage.test.js`.
+- DOM-dependent code (`handleFileSelect`, `displayConversations`, `selectConversation`, `displayConversation`, `handleSearch`, `exportConversation`, `saveFileWithPicker`, `downloadMarkdown`, `showError`, `hideError`) is exported but currently untested, since the `document` stub is intentionally minimal.
+- Known defensive-coding regressions covered by tests: `extractConversations`/`getRole`/`splitThinking` must not throw on `null`/`undefined`/non-string inputs (malformed JSON export data).
+
 ## OpenCode Configuration
 
 - `mammouth.json` (root) sets `lsp: true` and `permission.bash: "ask"`.
@@ -80,7 +94,6 @@ Compact instructions for OpenCode sessions. Focus on repo-specific details that 
 
 - No root `.gitignore`, `.editorconfig`, or formatter config (only the local `.opencode/.gitignore`).
 - No CI/CD workflows.
-- No tests or snapshots.
 - No generated build artifacts.
 
 ## Quick Start

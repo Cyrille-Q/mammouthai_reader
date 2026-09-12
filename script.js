@@ -11,34 +11,40 @@ const state = {
 };
 
 // ===== Références DOM =====
-const fileInput = document.getElementById('file-input');
-const fileButton = document.getElementById('file-button');
-const fileNameLabel = document.getElementById('file-name');
-const conversationsList = document.getElementById('conversations-list');
-const conversationContent = document.getElementById('conversation-content');
-const conversationCount = document.getElementById('conversation-count');
-const searchInput = document.getElementById('search-input');
-const errorBanner = document.getElementById('error-banner');
-const errorMessage = document.getElementById('error-message');
+const fileInput = typeof document !== 'undefined' ? document.getElementById('file-input') : null;
+const fileButton = typeof document !== 'undefined' ? document.getElementById('file-button') : null;
+const fileNameLabel = typeof document !== 'undefined' ? document.getElementById('file-name') : null;
+const conversationsList = typeof document !== 'undefined' ? document.getElementById('conversations-list') : null;
+const conversationContent = typeof document !== 'undefined' ? document.getElementById('conversation-content') : null;
+const conversationCount = typeof document !== 'undefined' ? document.getElementById('conversation-count') : null;
+const searchInput = typeof document !== 'undefined' ? document.getElementById('search-input') : null;
+const errorBanner = typeof document !== 'undefined' ? document.getElementById('error-banner') : null;
+const errorMessage = typeof document !== 'undefined' ? document.getElementById('error-message') : null;
 
 // ===== Événements =====
-fileButton.addEventListener('click', () => fileInput.click());
-fileInput.addEventListener('change', handleFileSelect);
-searchInput.addEventListener('input', handleSearch);
+if (typeof document !== 'undefined' && fileButton) {
+  fileButton.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', handleFileSelect);
+  searchInput.addEventListener('input', handleSearch);
+}
 
 // ===== Rendu Markdown =====
-marked.setOptions({
-  gfm: true,
-  breaks: true,
-});
+if (typeof marked !== 'undefined') {
+  marked.setOptions({
+    gfm: true,
+    breaks: true,
+  });
+}
 
 // Ajouter target="_blank" et rel="noopener noreferrer" aux liens
-DOMPurify.addHook('afterSanitizeAttributes', function (node) {
-  if (node.tagName === 'A') {
-    node.setAttribute('target', '_blank');
-    node.setAttribute('rel', 'noopener noreferrer');
-  }
-});
+if (typeof DOMPurify !== 'undefined') {
+  DOMPurify.addHook('afterSanitizeAttributes', function (node) {
+    if (node.tagName === 'A') {
+      node.setAttribute('target', '_blank');
+      node.setAttribute('rel', 'noopener noreferrer');
+    }
+  });
+}
 
 // ===== Gestion du fichier =====
 
@@ -92,6 +98,10 @@ function handleFileSelect(event) {
  */
 function extractConversations(data) {
   let chats = [];
+
+  if (!data || typeof data !== 'object') {
+    return [];
+  }
 
   if (Array.isArray(data)) {
     // Export Mammouth : tableau d'objets avec chacun un sous-tableau chats
@@ -230,7 +240,8 @@ function displayConversation(conv) {
  * On garde aussi une détection basée sur model pour les autres formats.
  */
 function getRole(msg, index) {
-  const model = (msg.model || '').toLowerCase();
+  const rawModel = msg && msg.model;
+  const model = typeof rawModel === 'string' ? rawModel.toLowerCase() : '';
   if (model === 'user' || model === 'human' || model === 'me') return 'user';
   if (model === 'system' || model === 'tool') return 'system';
 
@@ -248,6 +259,10 @@ function getRole(msg, index) {
  * bloc de réflexion délimité par les balises think.
  */
 function splitThinking(text) {
+  if (text === null || text === undefined) {
+    return { thinking: '', content: '' };
+  }
+
   const result = { thinking: '', content: text };
   const openTag = String.fromCharCode(60) + 'think' + String.fromCharCode(62);
   const closeTag = String.fromCharCode(60) + '/think' + String.fromCharCode(62);
@@ -528,4 +543,23 @@ function showError(msg) {
 
 function hideError() {
   errorBanner.classList.add('hidden');
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    extractConversations,
+    isValidConversation,
+    getRole,
+    splitThinking,
+    renderContent,
+    renderMessage,
+    conversationToMarkdown,
+    extractLinks,
+    sanitizeFilename,
+    escapeHtml,
+    formatDate,
+    showError,
+    hideError,
+    downloadMarkdown,
+  };
 }
